@@ -1,0 +1,18 @@
+{
+  "identities": [
+    {
+      "name": "raven",
+      "credentials": [
+        {
+          "accessKey": "raven",
+          "secretKey": "raven-secret"
+        }
+      ],
+      "actions": [
+        "Admin",
+        "Read",
+        "Write"
+      ]
+    }
+  ]
+}

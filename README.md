@@ -1,2 +1,2 @@
 # seaweedfs-docker-test
-This repository is to tes the seaweedfs with Docker setup
+This repository is to test the seaweedfs with Docker setup

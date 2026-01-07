@@ -27,17 +27,64 @@ SeaweedFS is a fast distributed storage system for blobs, objects, files, and da
 
 Before running this project, ensure you have:
 
+### Required
 - **Docker** (v20.10 or later) - [Install Docker](https://docs.docker.com/get-docker/)
 - **Docker Compose** (v2.0 or later) - Usually comes with Docker Desktop
 - **Go** (v1.21 or later) - [Install Go](https://golang.org/dl/)
-- **Git** (optional) - For cloning the repository
 
-Verify installations:
+### Optional
+- **AWS CLI** (v2.x) - For testing S3 operations via command line (optional, but recommended)
+- **Git** - For cloning the repository
+
+Verify required installations:
 ```bash
 docker --version
 docker-compose --version
 go version
 ```
+
+### Installing AWS CLI (Optional but Recommended)
+
+The AWS CLI allows you to interact with SeaweedFS S3 API from the command line. While the Go program handles all testing, AWS CLI is useful for manual operations.
+
+#### macOS
+
+**Option 1: Using Homebrew (Recommended)**
+```bash
+brew install awscli
+```
+
+**Option 2: Official Installer**
+```bash
+curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+sudo installer -pkg AWSCLIV2.pkg -target /
+rm AWSCLIV2.pkg
+```
+
+#### Linux
+
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm -rf aws awscliv2.zip
+```
+
+#### Windows
+
+Download and run the installer:
+```
+https://awscli.amazonaws.com/AWSCLIV2.msi
+```
+
+#### Verify AWS CLI Installation
+
+```bash
+aws --version
+# Should output: aws-cli/2.x.x ...
+```
+
+> **Note**: AWS CLI is optional. If not installed, the test script will skip Step 4 (AWS CLI tests) but all core functionality will still work via the Go program.
 
 ## 📁 Project Structure
 
@@ -187,6 +234,12 @@ Found 1 objects:
 ./test.sh
 ```
 
+This will run:
+- **Step 1**: Start Docker containers
+- **Step 2**: Wait for services to be healthy
+- **Step 3**: Run Go test program (upload/download/list/delete)
+- **Step 4**: Test with AWS CLI (only if installed)
+
 ### Simple Test (No Health Checks)
 ```bash
 ./simple-test.sh
@@ -195,6 +248,47 @@ Found 1 objects:
 ### Diagnose Issues
 ```bash
 ./diagnose.sh
+```
+
+### Manual Testing with AWS CLI
+
+If you have AWS CLI installed, you can manually interact with SeaweedFS:
+
+```bash
+# Set credentials
+export AWS_ACCESS_KEY_ID=raven
+export AWS_SECRET_ACCESS_KEY=raven-secret
+
+# List buckets
+aws --endpoint-url http://localhost:8333 \
+    --region us-east-1 \
+    s3 ls
+
+# List files in bucket
+aws --endpoint-url http://localhost:8333 \
+    --region us-east-1 \
+    s3 ls s3://email-attachments/
+
+# Upload a file
+echo "Test content" > test.txt
+aws --endpoint-url http://localhost:8333 \
+    --region us-east-1 \
+    s3 cp test.txt s3://email-attachments/test.txt
+
+# Download a file
+aws --endpoint-url http://localhost:8333 \
+    --region us-east-1 \
+    s3 cp s3://email-attachments/test.txt downloaded.txt
+
+# Delete a file
+aws --endpoint-url http://localhost:8333 \
+    --region us-east-1 \
+    s3 rm s3://email-attachments/test.txt
+
+# Remove bucket (must be empty)
+aws --endpoint-url http://localhost:8333 \
+    --region us-east-1 \
+    s3 rb s3://email-attachments
 ```
 
 ### View Container Logs
